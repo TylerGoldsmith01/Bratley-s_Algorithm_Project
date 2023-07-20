@@ -11,9 +11,18 @@ struct eventNode{
     int executionTime;
 };
 
+struct eventList{
+    struct eventNode ** events;
+    int numEvents;
+};
+
 int main(void){
     printf("In");
     return 0;
+}
+
+struct eventList *createEventsfromInput(FILE *infp){
+
 }
 
 //Recursive function to generate children
