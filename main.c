@@ -16,6 +16,7 @@ int main(void){
     return 0;
 }
 
+//Recursive function to generate children
 int generateChildren(struct eventNode *parent, int numChildren, int level){
     int child;
     struct eventNode* currChild;
