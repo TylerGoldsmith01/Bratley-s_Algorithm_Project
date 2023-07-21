@@ -11,9 +11,15 @@ struct eventNode{
     int executionTime;
 };
 
-struct eventList{
-    struct eventNode ** events;
-    int numEvents;
+//map input data
+
+struct map{
+    int key;
+    char * name;
+    int arrivalTime;
+    int deadline;
+    int executionTime;
+
 };
 
 int main(void){
@@ -21,8 +27,41 @@ int main(void){
     return 0;
 }
 
-struct eventList *createEventsfromInput(FILE *infp){
+struct map *parse(FILE *infp){
+int numInputCases=0;
+    int currNumInputs;
+    char currChar;
 
+    int readingFile = 0;
+    int readingEntry=0;
+    int readingEntryValues=0;
+
+    while (!readingFile){
+        if ((currChar = fgetc(infp))=='[')
+            readingFile=1;
+    }
+
+    while(readingFile){
+        currChar = fgetc(infp);
+
+        if(currChar =='{')
+            readingEntry = 1;
+
+        if(readingEntry && currChar=='"'){
+            if(!readingEntryValues){
+                readingEntryValues = 1;
+                char * tempSTR;
+                int numChar = 0;
+                while(currChar!='"'){
+                    //Read in value
+                }
+                //string case statement to select parameter to be set
+            }
+            else
+                readingEntryValues = 0;
+        }
+
+    }
 }
 
 //Recursive function to generate children
@@ -33,7 +72,6 @@ int generateChildren(struct eventNode *parent, int numChildren, int level){
 
     for(child=0 ; child<numChildren ; child++){
         currChild = malloc(sizeof(struct eventNode));
-
         childFinish = currChild->executionTime;
 
         if(parent->timeEnum < currChild->arrivalTime)
