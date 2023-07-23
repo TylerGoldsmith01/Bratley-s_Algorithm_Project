@@ -1,4 +1,8 @@
 #include <stdio.h>
+#include <stdlib.h>
+
+
+struct map *parse(FILE *);
 
 struct eventNode{
     struct eventNode ** children;
@@ -13,7 +17,7 @@ struct eventNode{
 
 //map input data
 
-struct map{
+struct mapEntry{
     int key;
     char * name;
     int arrivalTime;
@@ -22,13 +26,22 @@ struct map{
 
 };
 
+struct map{
+    struct mapEntry *mapData;
+    int numElements;
+};
+
 int main(void){
-    printf("In");
+    printf("In\n");
+    FILE *infp;
+    infp = fopen("C:\\Users\\Tyler\\Desktop\\Bratley's_Algorithm_Project\\input.txt","r");
+    struct map * inputMap = parse(infp);
     return 0;
 }
 
 struct map *parse(FILE *infp){
-int numInputCases=0;
+    printf("In parse\n");
+    int numInputCases=0;
     int currNumInputs;
     char currChar;
 
@@ -39,11 +52,12 @@ int numInputCases=0;
     while (!readingFile){
         if ((currChar = fgetc(infp))=='[')
             readingFile=1;
+        printf("%c\n",currChar);
     }
-
+/*
     while(readingFile){
         currChar = fgetc(infp);
-
+        printf("%c ",currChar);
         if(currChar =='{')
             readingEntry = 1;
 
@@ -61,7 +75,7 @@ int numInputCases=0;
                 readingEntryValues = 0;
         }
 
-    }
+    }*/
 }
 
 //Recursive function to generate children
