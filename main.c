@@ -294,7 +294,7 @@ int generateChildren(struct eventNode *parent,struct map *inputMap,int level){
             
             //Check if this section of the schedule is feasible...\n otherwise break the line
             if(timeToRun <= currChild->deadline){
-                printf("Valid Branch\n");
+                printf("Valid Branch\n\n");
                 if(level == inputMap->numElements-1){
                     printf("Found the final schedule return indicator!");
                     return 1;
@@ -305,7 +305,7 @@ int generateChildren(struct eventNode *parent,struct map *inputMap,int level){
                 }
             }
             else{
-                printf("Invalid Branch\n");
+                printf("Invalid Branch\n\n");
                 free(currChild);
                 return 0;
             }
