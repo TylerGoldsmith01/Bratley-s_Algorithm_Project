@@ -5,10 +5,14 @@
 #define MAX_FIELD_LENGTH 20
 
 struct map *parse(FILE *);
+struct eventNode *getInputFromMap(struct map *,int);
+int generateChildren(struct eventNode *,struct map *,int);
+void printpath(struct eventNode *, int);
 
 struct eventNode{
     struct eventNode ** children;
     struct eventNode * parent;
+    char * name;
     int taskNum;
     int timeEnum;
 
@@ -46,6 +50,13 @@ int main(void){
     inputMap->mapData[i]->arrivalTime,
     inputMap->mapData[i]->deadline,
     inputMap->mapData[i]->executionTime);
+    
+
+   //Root node only cares about time enumerated
+   struct eventNode *root = malloc(sizeof(struct eventNode));
+   root->timeEnum = 0;
+
+    int result =  generateChildren(root,inputMap,0);
 
     fclose(infp);
     return 0;
@@ -89,7 +100,7 @@ struct map *parse(FILE *infp){
         currChar = fgetc(infp);
         if (currChar =='['){
             readingFile=1;
-            printf("Reading Input [%c]\n",currChar);
+            printf("Reading Input \n",currChar);
         }
     }
 
@@ -105,7 +116,7 @@ struct map *parse(FILE *infp){
 
             } else if (currChar == ']'){
                 readingFile=0;
-                printf("Done Reading Input File");
+                printf("Done Reading Input File\n\n");
             }
         }
 
@@ -207,24 +218,98 @@ struct map *parse(FILE *infp){
     return tempMap;
 }
 
-//Recursive function to generate children
-int generateChildren(struct eventNode *parent, int numChildren, int level){
-    int child;
-    struct eventNode* currChild;
-    int childFinish;
-
-    for(child=0 ; child<numChildren ; child++){
-        currChild = malloc(sizeof(struct eventNode));
-        childFinish = currChild->executionTime;
-
-        if(parent->timeEnum < currChild->arrivalTime)
-            childFinish += (currChild->arrivalTime);
-        else
-            childFinish += (parent->timeEnum);
-        
-        if(childFinish > currChild->deadline)
-            return 0;
-        else
-            generateChildren(currChild,level,level+1);
+struct eventNode *getInputFromMap(struct map *inputMap, int key){
+    struct eventNode * tempNode = malloc(sizeof(struct eventNode));
+    struct mapEntry * currmapEntry;
+    //Search for the input key to select the proper element on the map
+    for (int i=0;i<inputMap->numElements;i++){
+        if(inputMap->mapData[i]->key == key)
+            currmapEntry = inputMap->mapData[i];
     }
+    tempNode->arrivalTime= currmapEntry->arrivalTime;
+    tempNode->executionTime = currmapEntry->executionTime;
+    tempNode->deadline = currmapEntry->deadline;
+    tempNode->name = currmapEntry->name;
+    tempNode->taskNum = currmapEntry->key;
+    return tempNode;
+}
+
+void printpath(struct eventNode *node, int level){
+    struct eventNode *parent = node->parent;
+    printf("Current Path = [%s]<-", node->name);
+    for(int l = level; l>0;l--){
+        printf("%s<-", parent->name);
+        parent = parent->parent;
+    }
+}
+
+//Recursive function to generate children
+int generateChildren(struct eventNode *parent,struct map *inputMap,int level){
+
+    int * childrenKeys = malloc(inputMap->numElements * sizeof(int));
+
+    struct eventNode *parentUnderAnalysis;
+    parentUnderAnalysis = parent;
+
+    struct eventNode* currChild;
+    int timeEnum;
+
+    for(int i=0; i<inputMap->numElements;i++){
+        childrenKeys[i]=1;
+    }
+
+    printf("\nCurrent Parent path: ");
+    //Set all the parent nodes in the list to 0 so as not to recreate any nodes
+    for(int parent=level; parent>0; parent--){
+        childrenKeys[parentUnderAnalysis->taskNum] = 0;
+        printf("%s->",parentUnderAnalysis->name);
+        parentUnderAnalysis = parentUnderAnalysis->parent;
+    }
+    printf("\n");
+
+    for(int child=0 ; child<inputMap->numElements ; child++){
+        if(childrenKeys[child]==1){
+            //Create the nodes from the input map starting from the lowest event
+            printf("Creating child from Key %d\n", child);
+            currChild = getInputFromMap(inputMap,child);
+            printf("Created child %s from Key %d\n", currChild->name,child);
+            currChild->parent = parent;
+            //Maybe set the children, but probobly don't need
+
+            int timeToRun;
+
+            //Calculate the time taken to execute this child
+            timeToRun = currChild->executionTime;
+
+            if(parent->timeEnum < currChild->arrivalTime){
+                timeToRun += (currChild->arrivalTime);
+            }else{
+                timeToRun += (parent->timeEnum);
+            }
+            currChild->timeEnum = timeToRun;
+
+            printf("%s:\n\t", currChild->name);
+            printpath(currChild,level);
+            printf("\n\tTime to Run: %d\n\tDeadline: %d\n",currChild->timeEnum, currChild->deadline);
+            
+            //Check if this section of the schedule is feasible...\n otherwise break the line
+            if(timeToRun <= currChild->deadline){
+                printf("Valid Branch\n");
+                if(level == inputMap->numElements-1){
+                    printf("Found the final schedule return indicator!");
+                    return 1;
+                }
+                int validBranch = generateChildren(currChild, inputMap, level+1);
+                if(validBranch==1){
+                    return 1;
+                }
+            }
+            else{
+                printf("Invalid Branch\n");
+                free(currChild);
+                return 0;
+            }
+        }
+    }
+    return 1;
 }

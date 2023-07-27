@@ -4,28 +4,28 @@
         "ID" : 0,
         "name" : "event1",
         "arrivalTime" : 0,
-        "deadlineTime" : 3,
-        "executionTime" : 1
+        "deadlineTime" : 18,
+        "executionTime" : 6
         },
     {
         "ID" : 1,
         "name" : "event2",
-        "arrivalTime" : 1,
-        "deadlineTime" : 4,
-        "executionTime" : 1
+        "arrivalTime" : 4,
+        "deadlineTime" : 8,
+        "executionTime" : 2
         },
     {
         "ID" : 2,
         "name" : "event3",
-        "arrivalTime" : 1,
-        "deadlineTime" : 5,
-        "executionTime" : 2
+        "arrivalTime" : 2,
+        "deadlineTime" : 9,
+        "executionTime" : 4
         },
     {
         "ID" : 3,
         "name" : "event4",
-        "arrivalTime" : 2,
-        "deadlineTime" : 9,
-        "executionTime" : 4
+        "arrivalTime" : 6,
+        "deadlineTime" : 10,
+        "executionTime" : 2
         }
 ]
