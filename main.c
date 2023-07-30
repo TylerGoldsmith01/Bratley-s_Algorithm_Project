@@ -14,6 +14,7 @@ struct map *parse(FILE *);
 struct eventNode *getInputFromMap(struct map *,int);
 int generateChildren(struct eventNode *,struct map *,int,FILE *);
 void printpath(struct eventNode *, int, FILE *);
+int freeNode(struct eventNode *, int );
 
 struct eventNode{
     struct eventNode ** children;
@@ -49,7 +50,7 @@ int main(void){
     infp = fopen(inputPath,"r");
 
     FILE *outfp;
-    outfp = fopen("C:\\Users\\Tyler\\Desktop\\Bratley's_Algorithm_Project\\output_example.txt","w");
+    outfp = fopen("C:\\Users\\Tyler\\Desktop\\Bratley's_Algorithm_Project\\output_example_large_longestPath.txt","w");
     struct map * inputMap = parse(infp);
 
     for(int i=0;i<inputMap->numElements;i++)
@@ -256,6 +257,15 @@ void printpath(struct eventNode *node, int level, FILE *outfp){
     }
 }
 
+//Recursively free the final path discovered (all other nodes are freed when the path fails)
+int freeNode(struct eventNode *node, int currLevel){
+    struct eventNode *parent = node->parent;
+    currLevel--;
+    if(currLevel!=0)
+        freeNode(parent,currLevel--);
+    free(node);
+}
+
 //Recursive function to generate children
 int generateChildren(struct eventNode *parent,struct map *inputMap,int level, FILE *outfp){
 
@@ -310,6 +320,7 @@ int generateChildren(struct eventNode *parent,struct map *inputMap,int level, FI
                 fprintf(outfp,"Valid Branch\n\n");
                 if(level == inputMap->numElements-1){
                     fprintf(outfp,"\n Found a schedule that works");
+                    freeNode(currChild,level);
                     return 1;
                 }
                 int validBranch = generateChildren(currChild, inputMap, level+1,outfp);
