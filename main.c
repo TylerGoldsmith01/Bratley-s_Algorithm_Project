@@ -2,11 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-//#define inputPath "C:\\Users\\Tyler\\Desktop\\Bratley's_Algorithm_Project\\Inputs\\input.txt"
+#define inputPath "C:\\Users\\Tyler\\Desktop\\Bratley's_Algorithm_Project\\Inputs\\input.txt"
 //#define inputPath "C:\\Users\\Tyler\\Desktop\\Bratley's_Algorithm_Project\\Inputs\\input_large_shortestPath.txt"
 //#define inputPath "C:\\Users\\Tyler\\Desktop\\Bratley's_Algorithm_Project\\Inputs\\input_large_shortestPath_fail.txt"
 //#define inputPath "C:\\Users\\Tyler\\Desktop\\Bratley's_Algorithm_Project\\Inputs\\input_large_longestPath.txt"
-#define inputPath "C:\\Users\\Tyler\\Desktop\\Bratley's_Algorithm_Project\\Inputs\\input_large_longestPath_fail.txt"
+//#define inputPath "C:\\Users\\Tyler\\Desktop\\Bratley's_Algorithm_Project\\Inputs\\input_large_longestPath_fail.txt"
 
 #define MAX_FIELD_LENGTH 20
 
@@ -49,7 +49,7 @@ int main(void){
     infp = fopen(inputPath,"r");
 
     FILE *outfp;
-    outfp = fopen("C:\\Users\\Tyler\\Desktop\\Bratley's_Algorithm_Project\\output.txt","w");
+    outfp = fopen("C:\\Users\\Tyler\\Desktop\\Bratley's_Algorithm_Project\\output_example.txt","w");
     struct map * inputMap = parse(infp);
 
     for(int i=0;i<inputMap->numElements;i++)
