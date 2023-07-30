@@ -71,6 +71,12 @@ int main(void){
         printf("Found a successfull schedule");
     else
         printf("Could not generate a schedule from the given input events");
+    //Free input data
+    for(int i=0;i<inputMap->numElements;i++){
+        free(inputMap->mapData[i]->name);
+        free(inputMap->mapData[i]);
+    }
+    free(inputMap);
     fclose(infp);
     fclose(outfp);
     return 0;
