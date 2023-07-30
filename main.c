@@ -57,7 +57,10 @@ int main(void){
    root->timeEnum = 0;
 
     int result =  generateChildren(root,inputMap,0);
-
+    if (result)
+        printf("Found a successfull schedule");
+    else
+        printf("Could not generate a schedule from the given input events");
     fclose(infp);
     return 0;
 }
@@ -296,7 +299,6 @@ int generateChildren(struct eventNode *parent,struct map *inputMap,int level){
             if(timeToRun <= currChild->deadline){
                 printf("Valid Branch\n\n");
                 if(level == inputMap->numElements-1){
-                    printf("Found the final schedule return indicator!");
                     return 1;
                 }
                 int validBranch = generateChildren(currChild, inputMap, level+1);
