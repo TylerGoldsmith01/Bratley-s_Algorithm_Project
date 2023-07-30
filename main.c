@@ -16,8 +16,9 @@ int generateChildren(struct eventNode *,struct map *,int,FILE *);
 void printpath(struct eventNode *, int, FILE *);
 int freeNode(struct eventNode *, int );
 
+//struct to hold the event nodes which hold schedule information at points on the tree
 struct eventNode{
-    struct eventNode ** children;
+    //struct eventNode ** children;
     struct eventNode * parent;
     char * name;
     int taskNum;
@@ -28,8 +29,7 @@ struct eventNode{
     int executionTime;
 };
 
-//map input data
-
+//map input data stored in (key,value) format and used to generate event nodes
 struct mapEntry{
     int key;
     
@@ -40,6 +40,7 @@ struct mapEntry{
 
 };
 
+//Structure to hold all map input entries
 struct map{
     struct mapEntry **mapData;
     int numElements;
@@ -53,8 +54,9 @@ int main(void){
     outfp = fopen("C:\\Users\\Tyler\\Desktop\\Bratley's_Algorithm_Project\\output.txt","w");
     struct map * inputMap = parse(infp);
 
+    //Print input data to console
     for(int i=0;i<inputMap->numElements;i++)
-    fprintf(outfp,"\nINPUT: %d,%s,%d,%d,%d\n",
+        fprintf(outfp,"\nINPUT: %d,%s,%d,%d,%d\n",
     inputMap->mapData[i]->key,
     inputMap->mapData[i]->name,
     inputMap->mapData[i]->arrivalTime,
@@ -66,11 +68,13 @@ int main(void){
    struct eventNode *root = malloc(sizeof(struct eventNode));
    root->timeEnum = 0;
 
+    //Function to recursively generate the Bratley's tree
     int result =  generateChildren(root,inputMap,0,outfp);
     if (result)
         printf("Found a successfull schedule");
     else
         printf("Could not generate a schedule from the given input events");
+
     //Free input data
     for(int i=0;i<inputMap->numElements;i++){
         free(inputMap->mapData[i]->name);
@@ -82,6 +86,7 @@ int main(void){
     return 0;
 }
 
+//Parses the json files and creates map entry for each input from file
 struct map *parse(FILE *infp){
     int numInputCases=0;
     int currNumInputs;
@@ -238,6 +243,8 @@ struct map *parse(FILE *infp){
     return tempMap;
 }
 
+//Simple function to use the key passed to the function to retrieve values from the tree
+//And store them as a node to be placed ont he tree
 struct eventNode *getInputFromMap(struct map *inputMap, int key){
     struct eventNode * tempNode = malloc(sizeof(struct eventNode));
     struct mapEntry * currmapEntry;
@@ -254,6 +261,7 @@ struct eventNode *getInputFromMap(struct map *inputMap, int key){
     return tempNode;
 }
 
+//Climbs the tree, and prints the parent path up to root to indicate the location of node on tree
 void printpath(struct eventNode *node, int level, FILE *outfp){
     struct eventNode *parent = node->parent;
     fprintf(outfp, "Current Path = [%s]<-", node->name);
@@ -275,6 +283,7 @@ int freeNode(struct eventNode *node, int currLevel){
 //Recursive function to generate children
 int generateChildren(struct eventNode *parent,struct map *inputMap,int level, FILE *outfp){
 
+    //Array to figure out which children need to be created based on index
     int * childrenKeys = malloc(inputMap->numElements * sizeof(int));
 
     struct eventNode *parentUnderAnalysis;
@@ -288,7 +297,9 @@ int generateChildren(struct eventNode *parent,struct map *inputMap,int level, FI
     }
 
     fprintf(outfp, "\nCurrent Parent path: ");
-    //Set all the parent nodes in the list to 0 so as not to recreate any nodes
+
+    //climb up the tree, and set the index of the parent node to 0 in the childrenKeys list
+    //to indicate that this node will not be created as a child
     for(int parent=level; parent>0; parent--){
         childrenKeys[parentUnderAnalysis->taskNum] = 0;
         fprintf(outfp,"%s->",parentUnderAnalysis->name);
@@ -296,6 +307,7 @@ int generateChildren(struct eventNode *parent,struct map *inputMap,int level, FI
     }
     fprintf(outfp,"\n");
 
+    //Create all the children of the parent node
     for(int child=0 ; child<inputMap->numElements ; child++){
         if(childrenKeys[child]==1){
             //Create the nodes from the input map starting from the lowest event
@@ -324,18 +336,24 @@ int generateChildren(struct eventNode *parent,struct map *inputMap,int level, FI
             //Check if this section of the schedule is feasible...\n otherwise break the line
             if(timeToRun <= currChild->deadline){
                 fprintf(outfp,"Valid Branch\n\n");
+
+                //Check if the algorithm has reached the bottom of the tree (if true schedule is complete)
                 if(level == inputMap->numElements-1){
                     fprintf(outfp,"\n Found a schedule that works");
                     freeNode(currChild,level);
                     return 1;
                 }
+
+                //Recursive call
                 int validBranch = generateChildren(currChild, inputMap, level+1,outfp);
                 if(validBranch==1){
                     return 1;
                 }
             }
+            //Break case for an invalid branch to be pruned
             else{
                 fprintf(outfp,"Invalid Branch\n\n");
+                free(childrenKeys);
                 free(currChild);
                 return 0;
             }
