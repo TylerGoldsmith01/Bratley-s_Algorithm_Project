@@ -50,7 +50,7 @@ int main(void){
     infp = fopen(inputPath,"r");
 
     FILE *outfp;
-    outfp = fopen("C:\\Users\\Tyler\\Desktop\\Bratley's_Algorithm_Project\\output_example_large_longestPath.txt","w");
+    outfp = fopen("C:\\Users\\Tyler\\Desktop\\Bratley's_Algorithm_Project\\output.txt","w");
     struct map * inputMap = parse(infp);
 
     for(int i=0;i<inputMap->numElements;i++)
