@@ -307,56 +307,80 @@ int generateChildren(struct eventNode *parent,struct map *inputMap,int level, FI
     }
     fprintf(outfp,"\n");
 
-    //Create all the children of the parent node
-    for(int child=0 ; child<inputMap->numElements ; child++){
+    //Check the timing of all the children before creating any children to check if branch should be pruned
+    int child;
+    for(child=0 ; child<inputMap->numElements ; child++){
+        if(childrenKeys[child]==1){
+            int executionTime = inputMap->mapData[child]->executionTime;
+            int arrivalTime = inputMap->mapData[child]->arrivalTime;
+            int deadline = inputMap->mapData[child]->deadline;
+            int timeToRun = executionTime;
+
+            if(parent->timeEnum < arrivalTime){
+                timeToRun += (arrivalTime);
+            }else{
+                timeToRun += (parent->timeEnum);
+            }    
+            //Check if this section of the schedule is feasible...\n otherwise break the line
+            if(timeToRun <= deadline){
+                fprintf(outfp,"Valid Branch found at Node %s\n", inputMap->mapData[child]->name);
+
+                //Check if the algorithm has reached the bottom of the tree (if true schedule is complete)
+                if(level == inputMap->numElements-1){
+                    fprintf(outfp,"\n Found a schedule that works at \n");
+                    fprintf(outfp,"%s<-",inputMap->mapData[child]->name);
+                    parentUnderAnalysis = parent;
+
+                    //Print final schedule then return up
+                    for(int parent=level-1; parent>=0; parent--){
+                        if(parent!=0)
+                            fprintf(outfp,"%s<-",parentUnderAnalysis->name);
+                        else
+                            fprintf(outfp,"%s<-",parentUnderAnalysis->name);
+                        parentUnderAnalysis = parentUnderAnalysis->parent;
+                    }
+                    //freeNode(currChild,level);
+                    return 1;
+                }
+            }
+            //Break case for an invalid branch to be pruned
+            else{
+                fprintf(outfp,"Invalid Branch found at node %s...Prune\n",inputMap->mapData[child]->name);
+                fprintf(outfp,"\n\n");
+                free(childrenKeys);
+                free(parent);
+                return 0;
+            }
+        }
+    }
+    fprintf(outfp,"\n\n");
+    //If code makes it here all children are valid (otherwise it would return 0)
+    //Rerun loop to recursively generate children
+    for(child=0 ; child<inputMap->numElements ; child++){
         if(childrenKeys[child]==1){
             //Create the nodes from the input map starting from the lowest event
             fprintf(outfp,"Creating child from Key %d\n", child);
             currChild = getInputFromMap(inputMap,child);
             fprintf(outfp,"Created child %s from Key %d\n", currChild->name,child);
             currChild->parent = parent;
-            //Maybe set the children, but probobly don't need
-
-            int timeToRun;
 
             //Calculate the time taken to execute this child
-            timeToRun = currChild->executionTime;
+            int timeToRun = currChild->executionTime;
 
             if(parent->timeEnum < currChild->arrivalTime){
                 timeToRun += (currChild->arrivalTime);
             }else{
                 timeToRun += (parent->timeEnum);
             }
-            currChild->timeEnum = timeToRun;
+            currChild->timeEnum = timeToRun;   
 
             fprintf(outfp,"%s:\n\t", currChild->name);
             printpath(currChild,level, outfp);
             fprintf(outfp,"\n\tLayer %d\n\tTime to Run: %d\n\tDeadline: %d\n",level,currChild->timeEnum, currChild->deadline);
             
-            //Check if this section of the schedule is feasible...\n otherwise break the line
-            if(timeToRun <= currChild->deadline){
-                fprintf(outfp,"Valid Branch\n\n");
-
-                //Check if the algorithm has reached the bottom of the tree (if true schedule is complete)
-                if(level == inputMap->numElements-1){
-                    fprintf(outfp,"\n Found a schedule that works");
-                    freeNode(currChild,level);
-                    return 1;
-                }
-
-                //Recursive call
-                int validBranch = generateChildren(currChild, inputMap, level+1,outfp);
-                if(validBranch==1){
-                    return 1;
-                }
-            }
-            //Break case for an invalid branch to be pruned
-            else{
-                fprintf(outfp,"Invalid Branch\n\n");
-                free(childrenKeys);
-                free(currChild);
-                return 0;
-            }
+            int validBranch = generateChildren(currChild, inputMap, level+1,outfp);
+            if(validBranch)
+                return 1;
         }
     }
     return 0;
